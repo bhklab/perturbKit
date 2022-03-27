@@ -49,8 +49,8 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       ncol <- dim(ds1@mat)[2]
       
       es <- matrix(numeric(dim(ds2@mat)[2] * ncol), ncol = ncol)
-      #printf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2])
-      #printf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2])
+      #print(sprintf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2]))
+      #print(sprintf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2]))
       
       for (ii in seq(dim(ds2@mat)[2])){
         tempGSEA <- fgsea(allsets, ds2@mat[, ii], nperm=nperms, gseaParam=gseaParam)
@@ -61,7 +61,7 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
         es[ii, ] <- (upscore - dnscore)/2 * abs(sign(upscore) - sign(dnscore))/2
         
         if (ii %% 100 == 0){
-          printf("%d / %d\n", ii, dim(ds2@mat)[2])
+          print(sprintf("%d / %d\n", ii, dim(ds2@mat)[2]))
         }
       }
       
@@ -115,8 +115,8 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]
       
-      #printf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2])
-      #printf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2])
+      #print(sprintf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2]))
+      #print(sprintf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2]))
       
       tempGSEA <- parallel::mclapply(seq(dim(ds2@mat)[2]), FUN=function(x) fgsea(allsets, ds2@mat[,x], nperm=nperms, gseaParam=gseaParam), mc.cores=numCores)
       zes <- lapply(tempGSEA, FUN=function(y) (y$ES[1:ncol] - y$ES[(1+ncol):(2*ncol)])/2 * abs(sign(y$ES[1:ncol]) - sign(y$ES[(1+ncol):(2*ncol)]))/2)
