@@ -1,4 +1,18 @@
-# Compute distance is a function for computing similarities 
+#' compute_distance - a function for computing similarities on elements of a vector space, as in L1000 data
+#'
+#' @param ds 
+#' @param gene_annot 
+#' @param upgenes 
+#' @param dngenes 
+#' @param geneweights 
+#' @param geneset_name 
+#' @param metric 
+#' @param gseaParam 
+#' @param nperms 
+#'
+#' @return data frame
+#' @export
+#' @importFrom fgsea fgsea fgseaMultilevel fgseaSimple 
 compute_distance <- function(ds, gene_annot, upgenes=c(), dngenes=c(), geneweights=0, 
                              geneset_name="", metric="cmap_score", 
                              gseaParam=1, nperms=1000){

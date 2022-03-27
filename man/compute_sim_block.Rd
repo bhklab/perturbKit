@@ -10,7 +10,9 @@ compute_sim_block(
   metric = "cosine",
   kgenes = 0,
   gseaParam = 1,
-  nperms = 1
+  nperms = 1,
+  parallel = 0,
+  numCores = parallel::detectCores()
 )
 }
 \arguments{
@@ -25,6 +27,9 @@ compute_sim_block(
 \item{gseaParam}{The GSEA parameter that affects the weighting of the gene values in GSEA.  Default is 1.}
 
 \item{nperms}{Numeric, indicates how many permutations are run by fgsea for significance calculations.  As p-values from GSEA are not used, this defaults to 1.}
+}
+\value{
+matrix
 }
 \description{
 This function takes as input two gct datasets and computes a similarity matrix between

@@ -13,6 +13,9 @@ get_top_k(dsmat, k = 50, decreasing = TRUE)
 
 \item{decreasing}{A boolean indicating whether to get the largest elements (TRUE) or the smallest elements (FALSE); true by default.}
 }
+\value{
+vector
+}
 \description{
 This is a helper function used in compute_sim_block that identifies the row identifiers of the K largest or smallest elements in each column of a matrix.
 }
