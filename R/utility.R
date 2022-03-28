@@ -1,7 +1,6 @@
 #' get_level5_ds - return the path to the level 5 dataset in a directory to simplify grabbing file names. 
 #'
 #' @param mypath Path to the file to which the downloaded data is saved
-#' @param version numeric, either 2017 or 2020
 #'
 #' @return
 #' @export
