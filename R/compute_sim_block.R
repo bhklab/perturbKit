@@ -40,6 +40,17 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       rownames(cosres) <- ds2@cid
       return(cosres)
       
+    } else if (metric == "fastcosine"){
+      
+      if (kgenes > 0){
+        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
+      }
+      
+      cosres <- cosine(ds1@mat, ds2@mat)
+      colnames(cosres) <- ds1@cid
+      rownames(cosres) <- ds2@cid
+      return(cosres)
+
     } else if (metric == "wtcs"){
       
       upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
@@ -98,7 +109,7 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       # Currently iterative; parallelize
       
       x <- parallel::mclapply(seq(dim(ds1@mat)[2]), FUN=function(x) {
-        sapply(seq(dim(ds2@mat)[2]), FUN=function(y) cosine(ds1@mat[,x], ds2@mat[,y]))
+        sapply(seq(dim(ds2@mat)[2]), FUN=function(y) coop::cosine(ds1@mat[,x], ds2@mat[,y]))
         }, mc.cores=numCores)
       cosres <- matrix(unlist(x), nrow=dim(ds1@mat)[2])
       
@@ -107,7 +118,19 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       rownames(cosres) <- ds2@cid
       
       return(cosres)
-    }  else if (metric == "wtcs"){
+    } else if (metric == "fastcosine"){
+      # This is the same as serial fast cosine
+      
+      if (kgenes > 0){
+        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
+      }
+      
+      cosres <- cosine(ds1@mat, ds2@mat)
+      colnames(cosres) <- ds1@cid
+      rownames(cosres) <- ds2@cid
+      return(cosres)
+      
+    } else if (metric == "wtcs"){
       
       upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
       dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
