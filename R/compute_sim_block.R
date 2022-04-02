@@ -171,6 +171,20 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
       colnames(es) <- ds1@cid
       return(es)
       
+    } else if (metric == "fastwtcs"){
+      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      allsets <- c(upsets, dnsets)
+      names(allsets) <- as.character(seq(length(allsets)))
+      ncol <- dim(ds1@mat)[2]
+      
+      tempGSEA <- parallel::mclapply(seq(dim(ds2@mat)[2]), FUN=function(x) fgseaBase(allsets, ds2@mat[,x], nperm=nperms, gseaParam=gseaParam), mc.cores=numCores)
+      zes <- lapply(tempGSEA, FUN=function(y) (y$ES[1:ncol] - y$ES[(1+ncol):(2*ncol)])/2 * abs(sign(y$ES[1:ncol]) - sign(y$ES[(1+ncol):(2*ncol)]))/2)
+      es <- t(matrix(unlist(zes), ncol = dim(ds2@mat)[2]))
+      
+      rownames(es) <- ds2@cid
+      colnames(es) <- ds1@cid
+      return(es)
     } else if (metric == "pearson") {
       
       return(compute_sim_block(ds1, ds2, metric="pearson", parallel=0))
