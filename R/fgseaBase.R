@@ -26,7 +26,7 @@
 #' @import BiocParallel
 #' @import fastmatch
 #' @import stats
-#' 
+#' @import 
 
 
 fgseaBase <- function(pathways,
@@ -72,7 +72,7 @@ fgseaBase <- function(pathways,
   BPPARAM <- fgsea:::setUpBPPARAM(nproc=nproc, BPPARAM=BPPARAM)
   
   ES <- do.call(rbind,
-                lapply(pathwaysFiltered, calcGseaStat,
+                lapply(pathwaysFiltered, fgsea::calcGseaStat,
                        stats=stats,
                        returnLeadingEdge=FALSE,
                        scoreType=scoreType))
