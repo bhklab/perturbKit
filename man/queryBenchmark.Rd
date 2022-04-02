@@ -4,14 +4,21 @@
 \alias{queryBenchmark}
 \title{queryBenchmark - Benchmark the performance of L1000 queries}
 \usage{
-queryBenchmark(ds, parallel = 1, k = c(10, 30, 100, 300))
+queryBenchmark(
+  ds,
+  k = c(10, 30, 100, 300),
+  parallel = 1,
+  numCores = detectCores()
+)
 }
 \arguments{
 \item{ds}{The dataset - a  GCT object (e.g. a gctx file from cmapR). The assumed structure has columns are samples, rows are genes.}
 
+\item{k}{Numeric vector of values to evaluate, typically 10, 100, 1000}
+
 \item{parallel}{Boolean, whether to evaluate the multicore performance from the library parallel.}
 
-\item{k}{Numeric vector of values to evaluate, typically 10, 100, 1000}
+\item{numCores}{numeric, the number of processing cores to assign to the task. Only used if parallel=1.}
 }
 \value{
 

@@ -7,7 +7,7 @@
 compute_sim_block(
   ds1,
   ds2,
-  metric = "cosine",
+  metric = "fastcosine",
   kgenes = 0,
   gseaParam = 1,
   nperms = 1,

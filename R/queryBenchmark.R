@@ -13,7 +13,7 @@
 queryBenchmark <- function(ds, k=c(10, 30, 100, 300), parallel=1, numCores=detectCores()){
   
   rpt <- c()
-  metrics <- c("cosine", "wtcs", "pearson", "spearman")
+  metrics <- c("fastcosine")
   for (mymet in metrics){
     rpt[[mymet]] <- cbind(metric=mymet, mybenchmark(k, ds, myfunc=compute_sim_block, name="", args=c(metric=mymet, parallel=parallel), reps=10))
   }

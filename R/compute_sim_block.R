@@ -16,15 +16,24 @@
 #' @importFrom coop cosine
 #' @importFrom parallel mclapply detectCores
 
-compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperms=1, parallel=0, numCores=parallel::detectCores()){
+compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam=1, nperms=1, parallel=0, numCores=parallel::detectCores()){
 
+  # Consider deprecating parallelization; fgsea doesn't seem to benefit from it, e.g. It's far
+  # better for the user to parallelize any matrices they want to compute rather than trying 
+  # to compute a single block. Perhaps a wrapper could parallelize matrix computation by dividing
+  # the problem into subproblems. 
+  
   if (!all.equal(ds1@rid, ds2@rid)){
     return("Error: input datasets did not have the same row space or rids.")
   }
+  
+  # Replace row names with integers for memory purposes
+  rownames(ds1@mat) <- seq_len(length(ds1@rid))
+  rownames(ds2@mat) <- seq_len(length(ds2@rid))
     
   if (parallel == 0){
 
-    if (metric == "cosine"){
+    if (metric == "slowcosine"){
       
       if (kgenes > 0){
         ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
@@ -40,7 +49,7 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       rownames(cosres) <- ds2@cid
       return(cosres)
       
-    } else if (metric == "fastcosine"){
+    } else if (metric == "cosine"){
       
       if (kgenes > 0){
         ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
@@ -60,8 +69,6 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       ncol <- dim(ds1@mat)[2]
       
       es <- matrix(numeric(dim(ds2@mat)[2] * ncol), ncol = ncol)
-      #print(sprintf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2]))
-      #print(sprintf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2]))
       
       for (ii in seq(dim(ds2@mat)[2])){
         tempGSEA <- fgsea(allsets, ds2@mat[, ii], nperm=nperms, gseaParam=gseaParam)
@@ -80,6 +87,33 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       colnames(es) <- ds1@cid
       return(es)
       
+    } else if (metric == "fastwtcs"){
+      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      allsets <- c(upsets, dnsets)
+      names(allsets) <- as.character(seq(length(allsets)))
+      ncol <- dim(ds1@mat)[2]
+      
+      es <- matrix(numeric(dim(ds2@mat)[2] * ncol), ncol = ncol)
+      #print(sprintf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2]))
+      #print(sprintf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2]))
+      
+      for (ii in seq(dim(ds2@mat)[2])){
+        tempGSEA <- fgseaBase(allsets, ds2@mat[, ii], nperm=nperms, gseaParam=gseaParam)
+        # This generates p-values, but is more expensive. 
+        # tGSEA <- fgseaMultilevel(allsets, ds2@mat[, ii], sampleSize=k)
+        upscore <- tempGSEA$ES[1:ncol]
+        dnscore <- tempGSEA$ES[(1+ncol):(2*ncol)]
+        es[ii, ] <- (upscore - dnscore)/2 * abs(sign(upscore) - sign(dnscore))/2
+        
+        if (ii %% 100 == 0){
+          print(sprintf("%d / %d\n", ii, dim(ds2@mat)[2]))
+        }
+      }
+      
+      rownames(es) <- ds2@cid
+      colnames(es) <- ds1@cid
+      return(es)
     } else if (metric == "pearson") {
       
       pearson_res <- cor(ds1@mat, ds2@mat, method="pearson")
@@ -100,13 +134,11 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
   } else {
     # Parallelized
     
-    if (metric == "cosine"){
+    if (metric == "slowcosine"){
       
       if (kgenes > 0){
         ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
       }
-      
-      # Currently iterative; parallelize
       
       x <- parallel::mclapply(seq(dim(ds1@mat)[2]), FUN=function(x) {
         sapply(seq(dim(ds2@mat)[2]), FUN=function(y) coop::cosine(ds1@mat[,x], ds2@mat[,y]))
@@ -116,19 +148,12 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       cosres <- t(cosres)
       colnames(cosres) <- ds1@cid
       rownames(cosres) <- ds2@cid
-      
       return(cosres)
-    } else if (metric == "fastcosine"){
-      # This is the same as serial fast cosine
       
-      if (kgenes > 0){
-        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
-      }
+    } else if (metric == "cosine"){
+      #lol no 
       
-      cosres <- cosine(ds1@mat, ds2@mat)
-      colnames(cosres) <- ds1@cid
-      rownames(cosres) <- ds2@cid
-      return(cosres)
+      return(compute_sim_block(ds1, ds2, metric="fastcosine", kgenes=kgenes, parallel=0))
       
     } else if (metric == "wtcs"){
       
@@ -137,10 +162,7 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       allsets <- c(upsets, dnsets)
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]
-      
-      #print(sprintf("ds1 mat dimension: %d x %d \n", dim(ds1@mat)[1], dim(ds1@mat)[2]))
-      #print(sprintf("ds2 mat dimension: %d x %d \n", dim(ds2@mat)[1], dim(ds2@mat)[2]))
-      
+
       tempGSEA <- parallel::mclapply(seq(dim(ds2@mat)[2]), FUN=function(x) fgsea(allsets, ds2@mat[,x], nperm=nperms, gseaParam=gseaParam), mc.cores=numCores)
       zes <- lapply(tempGSEA, FUN=function(y) (y$ES[1:ncol] - y$ES[(1+ncol):(2*ncol)])/2 * abs(sign(y$ES[1:ncol]) - sign(y$ES[(1+ncol):(2*ncol)]))/2)
       es <- t(matrix(unlist(zes), ncol = dim(ds2@mat)[2]))
@@ -151,17 +173,11 @@ compute_sim_block <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, 
       
     } else if (metric == "pearson") {
       
-      pearson_res <- cor(ds2@mat, ds1@mat, method="pearson")
-      colnames(pearson_res) <- ds1@cid
-      rownames(pearson_res) <- ds2@cid
-      return(pearson_res)
+      return(compute_sim_block(ds1, ds2, metric="pearson", parallel=0))
       
     } else if (metric == "spearman") {
       
-      spearman_res <- cor(ds2@mat, ds1@mat, method="spearman")
-      colnames(spearman_res) <- ds1@cid
-      rownames(spearman_res) <- ds2@cid
-      return(spearman_res)
+      return(compute_sim_block(ds1, ds2, metric="spearman", parallel=0))
       
     }
   }
