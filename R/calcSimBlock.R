@@ -1,11 +1,12 @@
-#' compute_sim_block
+#' calcSimBlock
 #' 
 #' This function takes as input two gct datasets and computes a similarity matrix between
 #' columns of the first dataset and columns of the second.  It requires the gene space to be 
 #' common to both.  Note that some similarity metrics, like GSEA-based metrics, are not symmetric.
-#' @param ds1 A gct instance, dataset 1
-#' @param ds2 A gct instance, dataset 2 (could be the same as dataset 1)
-#' @param metric A string, one of wtcs, cosine, spearman, pearson
+#' ds1 and ds2 may also be matrices of dimension N_features x N_signatures. 
+#' @param ds1 A gct instance, dataset 1 or a matrix
+#' @param ds2 A gct instance, dataset 2 (could be the same as dataset 1) or a matrix (must be same datatype as ds1)
+#' @param metric A string, one of wtcs, cosine, spearman, pearson, fastwtcs
 #' @param kgenes For those metrics that restrict the number of genes (wtcs, cosine), a parameter that determines how many genes are used to compute similarity. Default is 50 for GSEA, 0 (all) for cosine.
 #' @param gseaParam The GSEA parameter that affects the weighting of the gene values in GSEA.  Default is 1.
 #' @param nperms Numeric, indicates how many permutations are run by fgsea for significance calculations.  As p-values from GSEA are not used, this defaults to 1.
@@ -16,12 +17,21 @@
 #' @importFrom coop cosine
 #' @importFrom parallel mclapply detectCores
 
-compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam=1, nperms=1, parallel=0, numCores=parallel::detectCores()){
+calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperms=1, parallel=0, numCores=parallel::detectCores()){
 
+  metric <- match.arg(metric, c("wtcs", "cosine", "spearman", "pearson", "fastwtcs"))
+  
   # Consider deprecating parallelization; fgsea doesn't seem to benefit from it, e.g. It's far
   # better for the user to parallelize any matrices they want to compute rather than trying 
   # to compute a single block. Perhaps a wrapper could parallelize matrix computation by dividing
   # the problem into subproblems. 
+  
+  # This is a bit of a hack, but it casts input matrices into gct objects. Probably better to rewrite
+  # the function to operate on matrices, and extract matrices from GCT objects. 
+  if (is.numeric(ds1) & is.numeric(ds2)){
+    ds1 <- GCT(mat=ds1, rid=as.character(seq(dim(ds1)[1])), cid=as.character(seq(dim(ds1)[2])))
+    ds2 <- GCT(mat=ds2, rid=as.character(seq(dim(ds2)[1])), cid=as.character(seq(dim(ds2)[2])))
+  }
   
   if (!all.equal(ds1@rid, ds2@rid)){
     return("Error: input datasets did not have the same row space or rids.")
@@ -32,7 +42,6 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
   rownames(ds2@mat) <- seq_len(length(ds2@rid))
     
   if (parallel == 0){
-
     if (metric == "slowcosine"){
       
       if (kgenes > 0){
@@ -55,7 +64,7 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
         ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
       }
       
-      cosres <- cosine(ds1@mat, ds2@mat)
+      cosres <- CMAPToolkit::cosine(ds1@mat, ds2@mat)
       colnames(cosres) <- ds1@cid
       rownames(cosres) <- ds2@cid
       return(cosres)
@@ -79,7 +88,7 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
         es[ii, ] <- (upscore - dnscore)/2 * abs(sign(upscore) - sign(dnscore))/2
         
         if (ii %% 100 == 0){
-          print(sprintf("%d / %d\n", ii, dim(ds2@mat)[2]))
+          print(sprintf("%d / %d", ii, dim(ds2@mat)[2]))
         }
       }
       
@@ -107,7 +116,7 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
         es[ii, ] <- (upscore - dnscore)/2 * abs(sign(upscore) - sign(dnscore))/2
         
         if (ii %% 100 == 0){
-          print(sprintf("%d / %d\n", ii, dim(ds2@mat)[2]))
+          print(sprintf("%d / %d", ii, dim(ds2@mat)[2]))
         }
       }
       
@@ -131,7 +140,8 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
       return(spearman_res)
       
     }
-  } else {
+  } 
+  else {
     # Parallelized
     
     if (metric == "slowcosine"){
@@ -153,7 +163,7 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
     } else if (metric == "cosine"){
       #lol no 
       
-      return(compute_sim_block(ds1, ds2, metric="fastcosine", kgenes=kgenes, parallel=0))
+      return(calcSimBlock(ds1, ds2, metric="cosine", kgenes=kgenes, parallel=0))
       
     } else if (metric == "wtcs"){
       
@@ -187,11 +197,11 @@ compute_sim_block <- function(ds1, ds2, metric="fastcosine", kgenes=0, gseaParam
       return(es)
     } else if (metric == "pearson") {
       
-      return(compute_sim_block(ds1, ds2, metric="pearson", parallel=0))
+      return(calcSimBlock(ds1, ds2, metric="pearson", parallel=0))
       
     } else if (metric == "spearman") {
       
-      return(compute_sim_block(ds1, ds2, metric="spearman", parallel=0))
+      return(calcSimBlock(ds1, ds2, metric="spearman", parallel=0))
       
     }
   }
