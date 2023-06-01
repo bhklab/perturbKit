@@ -12,8 +12,11 @@
 cosine <- function(mat1, mat2){
   a <- t(mat1) %*% mat2
   
-  mag1 <- sqrt(diag(t(mat1) %*% mat1))
-  mag2 <- sqrt(diag(t(mat2) %*% mat2))
+  #mag1 <- sqrt(diag(t(mat1) %*% mat1))
+  #mag2 <- sqrt(diag(t(mat2) %*% mat2))
+  
+  mag1 <- sqrt(colSums(mat1^2))
+  mag2 <- sqrt(colSums(mat2^2))
   
   return(a/outer(mag1, mag2, "*"))
 }
