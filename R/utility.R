@@ -2,7 +2,7 @@
 #'
 #' @param mypath Path to the file to which the downloaded data is saved
 #'
-#' @return
+#' @return path to level5 dataset in a directory. 
 #' @export
 #'
 

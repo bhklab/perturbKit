@@ -5,7 +5,7 @@
 #' @param parallel Boolean, whether to evaluate the multicore performance from the library parallel.
 #' @param numCores numeric, the number of processing cores to assign to the task. Only used if parallel=1.
 #'
-#' @return
+#' @return dataframe of results
 #' @export
 #' @importFrom rbenchmark benchmark
 #' @importFrom cmapR subset_gct

@@ -3,7 +3,6 @@
 #' @param mypath Path to the file to which the downloaded data is saved
 #' @param version numeric, either 2017 or 2020
 #'
-#' @return
 #' @export
 #' @importFrom R.utils gunzip
 download_l1k_data <- function(mypath, version=2017){

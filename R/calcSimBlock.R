@@ -71,8 +71,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
 
     } else if (metric == "wtcs"){
       
-      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
-      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      upsets <- getTopK(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- getTopK(ds1@mat, k=kgenes, decreasing=FALSE)
       allsets <- c(upsets, dnsets)
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]
@@ -97,8 +97,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
       return(es)
       
     } else if (metric == "fastwtcs"){
-      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
-      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      upsets <- getTopK(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- getTopK(ds1@mat, k=kgenes, decreasing=FALSE)
       allsets <- c(upsets, dnsets)
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]
@@ -167,8 +167,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
       
     } else if (metric == "wtcs"){
       
-      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
-      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      upsets <- getTopK(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- getTopK(ds1@mat, k=kgenes, decreasing=FALSE)
       allsets <- c(upsets, dnsets)
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]
@@ -182,8 +182,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
       return(es)
       
     } else if (metric == "fastwtcs"){
-      upsets <- get_top_k(ds1@mat, k=kgenes, decreasing=TRUE)
-      dnsets <- get_top_k(ds1@mat, k=kgenes, decreasing=FALSE)
+      upsets <- getTopK(ds1@mat, k=kgenes, decreasing=TRUE)
+      dnsets <- getTopK(ds1@mat, k=kgenes, decreasing=FALSE)
       allsets <- c(upsets, dnsets)
       names(allsets) <- as.character(seq(length(allsets)))
       ncol <- dim(ds1@mat)[2]

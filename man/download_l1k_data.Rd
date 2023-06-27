@@ -11,9 +11,6 @@ download_l1k_data(mypath, version = 2017)
 
 \item{version}{numeric, either 2017 or 2020}
 }
-\value{
-
-}
 \description{
 download_l1k_data - download data for L1000 from GEO and clue.io
 }

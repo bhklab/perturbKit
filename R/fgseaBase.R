@@ -26,9 +26,6 @@
 #' @import BiocParallel
 #' @import fastmatch
 #' @import stats
-#' @import 
-
-
 fgseaBase <- function(pathways,
                       stats,
                       nperm,

@@ -21,7 +21,7 @@ queryBenchmark(
 \item{numCores}{numeric, the number of processing cores to assign to the task. Only used if parallel=1.}
 }
 \value{
-
+dataframe of results
 }
 \description{
 queryBenchmark - Benchmark the performance of L1000 queries

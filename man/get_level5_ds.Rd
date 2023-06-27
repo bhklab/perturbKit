@@ -10,7 +10,7 @@ get_level5_ds(mypath, mypattern = "")
 \item{mypath}{Path to the file to which the downloaded data is saved}
 }
 \value{
-
+path to level5 dataset in a directory.
 }
 \description{
 get_level5_ds - return the path to the level 5 dataset in a directory to simplify grabbing file names.

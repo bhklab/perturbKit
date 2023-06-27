@@ -1,4 +1,4 @@
-#' get_top_k
+#' getTopK
 #' 
 #' This is a helper function used in compute_sim_block that identifies the row identifiers of the K largest or smallest elements in each column of a matrix.
 #'
@@ -9,7 +9,7 @@
 #' @return vector
 #' @export
 
-get_top_k <- function(dsmat, k=50, decreasing=TRUE){
+getTopK <- function(dsmat, k=50, decreasing=TRUE){
   
   if (k > 500){
     k <- 500
