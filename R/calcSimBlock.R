@@ -10,6 +10,8 @@
 #' @param kgenes For those metrics that restrict the number of genes (wtcs, cosine), a parameter that determines how many genes are used to compute similarity. Default is 50 for GSEA, 0 (all) for cosine.
 #' @param gseaParam The GSEA parameter that affects the weighting of the gene values in GSEA.  Default is 1.
 #' @param nperms Numeric, indicates how many permutations are run by fgsea for significance calculations.  As p-values from GSEA are not used, this defaults to 1.
+#' @param parallel Logical, whether to parallelize. Default = 0.
+#' @param numCores numeric. If parallel, how many cores to use. Default = parallel::detectCores()
 #'
 #' @return matrix
 #'
@@ -29,8 +31,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
   # This is a bit of a hack, but it casts input matrices into gct objects. Probably better to rewrite
   # the function to operate on matrices, and extract matrices from GCT objects. 
   if (is.numeric(ds1) & is.numeric(ds2)){
-    ds1 <- GCT(mat=ds1, rid=as.character(seq(dim(ds1)[1])), cid=as.character(seq(dim(ds1)[2])))
-    ds2 <- GCT(mat=ds2, rid=as.character(seq(dim(ds2)[1])), cid=as.character(seq(dim(ds2)[2])))
+    ds1 <- cmapR::GCT(mat=ds1, rid=as.character(seq(dim(ds1)[1])), cid=as.character(seq(dim(ds1)[2])))
+    ds2 <- cmapR::GCT(mat=ds2, rid=as.character(seq(dim(ds2)[1])), cid=as.character(seq(dim(ds2)[2])))
   }
   
   if (!all.equal(ds1@rid, ds2@rid)){
@@ -45,7 +47,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
     if (metric == "slowcosine"){
       
       if (kgenes > 0){
-        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
+        ds1@mat <- as.matrix(ds1@mat * (MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | 
+                                        MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
       }
       
       cosres <- matrix(numeric(dim(ds1@mat)[2] * dim(ds2@mat)[2]), nrow = dim(ds1@mat)[2], dimnames=list(ds1@cid, ds2@cid))
@@ -61,10 +64,11 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
     } else if (metric == "cosine"){
       
       if (kgenes > 0){
-        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
+        ds1@mat <- as.matrix(ds1@mat * (MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | 
+                                        MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
       }
       
-      cosres <- CMAPToolkit::cosine(ds1@mat, ds2@mat)
+      cosres <- perturbKit::cosine(ds1@mat, ds2@mat)
       colnames(cosres) <- ds1@cid
       rownames(cosres) <- ds2@cid
       return(cosres)
@@ -147,7 +151,8 @@ calcSimBlock <- function(ds1, ds2, metric="cosine", kgenes=0, gseaParam=1, nperm
     if (metric == "slowcosine"){
       
       if (kgenes > 0){
-        ds1@mat <- as.matrix(ds1@mat * (colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
+        ds1@mat <- as.matrix(ds1@mat * (MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) <= kgenes | 
+                                        MatrixGenerics::colRanks(ds1@mat, preserveShape = TRUE) > (dim(ds1@mat)[1] - kgenes)))
       }
       
       x <- parallel::mclapply(seq(dim(ds1@mat)[2]), FUN=function(x) {

@@ -8,6 +8,8 @@ get_level5_ds(mypath, mypattern = "")
 }
 \arguments{
 \item{mypath}{Path to the file to which the downloaded data is saved}
+
+\item{mypattern}{Character, a substring to search for. Currently not implemented.}
 }
 \value{
 path to level5 dataset in a directory.

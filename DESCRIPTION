@@ -1,11 +1,11 @@
-Package: CMAPToolkit
-Title: Analysis of L1000 Connectivity Map Data
+Package: perturbKit
+Title: Package for the management, loading, and analysis of perturbational biological datasets
 Version: 0.0.0.9000
 Authors@R: c(
     person("Ian", "Smith", email="ianc.smith@mail.utoronto.ca", role=c("aut"), comment=c(ORCID="")),
     person("Benjamin", "Haibe-Kains", email="benjamin.haibe.kains@utoronto.ca", role=c("aut", "cre"))
     )
-Description: This package is designed for analysis on L1000 data in the Benjamin Haibe-Kains lab. It contains
+Description: This package is designed for analysis on perturbational data in the Benjamin Haibe-Kains lab. It contains
     a set of functions for computing similarities between perturbational signatures from the L1000 project, 
     originally generated as part of the NIH LINCS Consortium. 
 License: MIT + file LICENSE
@@ -13,7 +13,12 @@ Imports:
     parallel,
     fgsea,
     coop,
-    cmapR
+    cmapR, 
+    BiocParallel,
+    R.utils,
+    data.table,
+    fastmatch,
+    rbenchmark
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

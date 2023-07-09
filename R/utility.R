@@ -1,6 +1,7 @@
 #' get_level5_ds - return the path to the level 5 dataset in a directory to simplify grabbing file names. 
 #'
 #' @param mypath Path to the file to which the downloaded data is saved
+#' @param mypattern Character, a substring to search for. Currently not implemented. 
 #'
 #' @return path to level5 dataset in a directory. 
 #' @export

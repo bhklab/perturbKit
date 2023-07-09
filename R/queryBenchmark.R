@@ -15,7 +15,7 @@ queryBenchmark <- function(ds, k=c(10, 30, 100, 300), parallel=1, numCores=detec
   rpt <- c()
   metrics <- c("fastcosine")
   for (mymet in metrics){
-    rpt[[mymet]] <- cbind(metric=mymet, mybenchmark(k, ds, myfunc=compute_sim_block, name="", args=c(metric=mymet, parallel=parallel), reps=10))
+    rpt[[mymet]] <- cbind(metric=mymet, mybenchmark(k, ds, myfunc=calcSimBlock, name="", args=c(metric=mymet, parallel=parallel), reps=10))
   }
  
   rpt <- do.call("rbind", rpt) 

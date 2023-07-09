@@ -27,6 +27,10 @@ calcSimBlock(
 \item{gseaParam}{The GSEA parameter that affects the weighting of the gene values in GSEA.  Default is 1.}
 
 \item{nperms}{Numeric, indicates how many permutations are run by fgsea for significance calculations.  As p-values from GSEA are not used, this defaults to 1.}
+
+\item{parallel}{Logical, whether to parallelize. Default = 0.}
+
+\item{numCores}{numeric. If parallel, how many cores to use. Default = parallel::detectCores()}
 }
 \value{
 matrix

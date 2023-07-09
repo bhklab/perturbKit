@@ -37,13 +37,13 @@ compute_distance <- function(ds, gene_annot, upgenes=c(), dngenes=c(), geneweigh
     upgenes <- setdiff(upgenes, common)
     dngenes <- setdiff(dngenes, common)
     
-    upid <- geneinfo$pr_gene_id[match(upgenes, geneinfo$pr_gene_symbol)]
-    dnid <- geneinfo$pr_gene_id[match(dngenes, geneinfo$pr_gene_symbol)]
+    upid <- gene_annot$pr_gene_id[match(upgenes, gene_annot$pr_gene_symbol)]
+    dnid <- gene_annot$pr_gene_id[match(dngenes, gene_annot$pr_gene_symbol)]
     
     for (ii in seq(length(ds@cid))){
       if (ii %% 1000 == 0) {print(ii)}
       #tGSEA <- fgsea(list(upid=upid, dnid=dnid), ds@mat[, ii], nperm=nperms, gseaParam=gseaParam)
-      tGSEA <- fgseaMultilevel(list(upid=upid, dnid=dnid), ds@mat[, ii], sampleSize=k, gseaParam) 
+      tGSEA <- fgseaMultilevel(list(upid=upid, dnid=dnid), ds@mat[, ii], sampleSize=length(upgenes), gseaParam) 
       combES <- (tGSEA$ES[1] - tGSEA$ES[2])/2 * abs(sign(tGSEA$ES[1]) - sign(tGSEA$ES[2]))/2
       combNES <- (tGSEA$NES[1] - tGSEA$NES[2])/2 * abs(sign(tGSEA$NES[1]) - sign(tGSEA$NES[2]))/2
       
