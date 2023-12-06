@@ -1,4 +1,4 @@
-#' download_l1k_data - download data for L1000 from GEO and clue.io
+#' downloadL1kData - download data for L1000 from GEO and clue.io
 #'
 #' @param mypath Path to the file to which the downloaded data is saved
 #' @param version numeric, either 2017 or 2020
@@ -6,7 +6,7 @@
 #' @export
 #' @importFrom R.utils gunzip 
 #' @importFrom utils download.file 
-download_l1k_data <- function(mypath, version=2017){
+downloadL1kData <- function(mypath, version=2017){
   if (getOption('timeout') < 100000){
     options(timeout=100000)
   }
@@ -67,6 +67,8 @@ download_l1k_data <- function(mypath, version=2017){
                     destfile=file.path(mypath, "cellinfo_beta.txt"))
       utils::download.file(url="https://s3.amazonaws.com/macchiato.clue.io/builds/LINCS2020/level5/level5_beta_trt_cp_n720216x12328.gctx", 
                     destfile=file.path(mypath, "level5_beta_trt_cp_n720216x12328.gctx"))
+      utils::download.file(url="https://s3.amazonaws.com/macchiato.clue.io/builds/LINCS2020/level5/level5_beta_ctl_n58022x12328.gctx", 
+                    destfile=file.path(mypath, "level5_beta_ctl_n58022x12328.gctx"))
       utils::download.file(url="https://s3.amazonaws.com/macchiato.clue.io/builds/LINCS2020/compoundinfo_beta.txt", 
                     destfile=file.path(mypath, "compoundinfo_beta.txt"))
       utils::download.file(url="https://s3.amazonaws.com/macchiato.clue.io/builds/LINCS2020/geneinfo_beta.txt", 

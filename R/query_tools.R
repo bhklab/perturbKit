@@ -79,5 +79,5 @@ compute_distance <- function(ds, gene_annot, upgenes=c(), dngenes=c(), geneweigh
     
   }
   
-  res
+  return(res)
 }
