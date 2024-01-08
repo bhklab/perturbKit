@@ -39,14 +39,13 @@ downloadKinomescan <- function(outdir="."){
 
 createKinomescanObj <- function(datadir, outdir="."){
   
-  kinomef <- list.files(kinomedir, pattern = ".csv")
+  kinomef <- list.files(datadir, pattern = ".csv")
   
-  kinomeData <- lapply(kinomef, FUN=function(x) read.csv(file.path(kinomedir, x)))
+  kinomeData <- lapply(kinomef, FUN=function(x) read.csv(file.path(datadir, x)))
   
   # The kinomescan data is organized with three distinct sets of compound assays:
   # One set with 7 columns that measures %binding compared to control
   # One set with 6 columns that measures Kd. 
-  #
   ix <- which(sapply(kinomeData, FUN=function(x) "X..Control" %in% colnames(x)))
   jx <- which(sapply(kinomeData, FUN=function(x) "Kd" %in% colnames(x)))
   
@@ -117,6 +116,14 @@ createKinomescanObj <- function(datadir, outdir="."){
     
     }
   }
+  
+  saveRDS(list(pctControlData=pctControlData, drugData=drugData, proteinSet=protset), 
+          file=file.path(outdir, sprintf("KinomeScanPctControlDataset_%dx%d.rds", 
+                                         dim(pctControlData)[1], dim(pctControlData)[2])))
+  
+  saveRDS(list(kdData=kdData, drugData=kdDrugData, proteinSet=kdprotset),
+          file=file.path(outdir, sprintf("KinomeScanKDDataset_%dx%d.rds", 
+                                         dim(kdData)[1], dim(kdData)[2])))
   
 }
 
